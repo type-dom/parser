@@ -2,20 +2,20 @@
 
 ## Introduction
 
-TypeParser is 
+TypeDomParser is 
 
 ## Installation
 
 ```bash
 # or pnpm or yarn
-npm install type-parser
 ```
 
 ## Usage
 
-### Install the framework
+### Install the lib
 
-Create a hello world page to app:
+npm install type-dom-parser
+
 
 ```ts
 

@@ -1,11 +1,13 @@
 {
   "name": "type-dom-parser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "一种基于TypeDom框架的Dom解析类。",
   "main": "src/index.ts",
   "scripts": {
     "serve": "webpack-dev-server --mode=development --config ./build/webpack.config.js",
-    "lib": "tsc",
+    "build": "webpack --mode=production --config ./build/webpack.config.js",
+    "lib": "webpack --mode=none --config ./build/webpack.lib.config.js",
+    "js": "tsc",
     "prepub": "copy README.md js & copy package.json js",
     "pub": "cd js & npm publish",
     "test": "jest",
@@ -17,6 +19,7 @@
   },
   "keywords": [
     "type-dom",
+    "type-dom-parser",
     "TypeDom",
     "TypeNode",
     "typescript",
@@ -26,7 +29,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xjf7711/type-parser.git"
+    "url": "git+https://github.com/xjf7711/type-dom-parser.git"
   },
   "devDependencies": {
     "@babel/core": "^7.22.5",
