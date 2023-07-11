@@ -17,6 +17,7 @@
   },
   "keywords": [
     "type-dom",
+    "type-dom-parser",
     "TypeDom",
     "TypeNode",
     "typescript",
@@ -26,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xjf7711/type-parser.git"
+    "url": "git+https://github.com/xjf7711/type-dom-parser.git"
   },
   "devDependencies": {
     "@babel/core": "^7.22.5",
