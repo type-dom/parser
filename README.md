@@ -8,17 +8,15 @@ TypeDomParser is
 
 ```bash
 # or pnpm or yarn
+npm install type-dom-parser
 ```
 
 ## Usage
 
-### Install the lib
-
-npm install type-dom-parser
-
+### use the lib
 
 ```ts
-
+......
 ```
 ## License
 
