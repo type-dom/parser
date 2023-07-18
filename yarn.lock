@@ -7455,10 +7455,10 @@ type-detect@4.0.8:
   resolved "https://registry.npmjs.org/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-dom.ts@^0.0.17:
-  version "0.0.17"
-  resolved "https://registry.npmjs.org/type-dom.ts/-/type-dom.ts-0.0.17.tgz#496feb3ad4ea0855354003d746369931eeb736fe"
-  integrity sha512-XiybuCWq2u505bhy6+0bAwdWYa0uz/DAEXR6jWXhIPL3sPPTj8N/5MiHiv/Rj3UTQ1RnkzMX2fFNbFZyCJ9fWA==
+type-dom.ts@^0.0.24:
+  version "0.0.24"
+  resolved "https://registry.yarnpkg.com/type-dom.ts/-/type-dom.ts-0.0.24.tgz#98e6aebe50591e8842a6f9b16898532a686a4919"
+  integrity sha512-J5UAbm9HUwSqv73atiDpb1+U/PrHa5w2eqEocJ4jG9BGMAisQwtZpNX3r7pwXPIRPfvHIEvZ/+XCudExe2Sllw==
 
 type-fest@^0.20.2:
   version "0.20.2"
