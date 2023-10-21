@@ -1,4 +1,4 @@
-import { INodeAttr } from 'type-dom.ts/dist';
+import { INodeAttr } from 'type-dom.ts';
 export interface IContent {
   name: string,
   attributes: INodeAttr[], // ToDo 为什么用数组方式，而不是键值对？？？？
