@@ -1,8 +1,6 @@
 # TypeDomParser
-一种基于TypeDom框架的Dom解析器.
-## Introduction
 
-TypeDomParser is 
+一个基于TypeDom框架的Dom解析器.
 
 ## Installation
 
