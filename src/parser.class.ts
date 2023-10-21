@@ -1,4 +1,4 @@
-import { INodeAttr, TextNode, TypeElement, TypeNode, XElement } from 'type-dom.ts';
+import { INodeAttr, TextNode, XElement } from 'type-dom.ts';
 import { ParserErrorCode } from './parser.const';
 import { isWhitespace, isWhitespaceString } from './parser.util';
 import { IContent, IInstruction, IParam } from './parser.interface';
@@ -14,12 +14,12 @@ export class Parser {
   private _errorCode: number;
   private readonly _hasAttributes: boolean | undefined;
   private readonly _lowerCaseName: boolean | undefined;
-  constructor({ hasAttributes = true, lowerCaseName = false }: IParam) {
+  constructor(param?: IParam) {
     this._currentFragment = [];
     this._stack = [];
     this._errorCode = ParserErrorCode.NoError;
-    this._hasAttributes = hasAttributes;
-    this._lowerCaseName = lowerCaseName;
+    this._hasAttributes = param?.hasAttributes || true;
+    this._lowerCaseName = param?.lowerCaseName || false;
   }
   _resolveEntities(s: string): string {
     return s.replace(/&([^;]+);/g, (all, entity) => {
@@ -49,6 +49,7 @@ export class Parser {
    * @param start
    */
   _parseContent(s: string, start: number): IContent | null {
+    // console.log('_parseContent . ')
     const attributes: INodeAttr[] = [];
     let pos = start;
 
@@ -88,7 +89,9 @@ export class Parser {
       ++pos;
       skipWs();
       const attrEndChar = s[pos];
+      // 限定了属性值必须以 ' or " 结尾 ， 不能注掉，会解析出错
       if (attrEndChar !== '"' && attrEndChar !== "'") {
+        // console.log(`attrEndChar !== '"' && attrEndChar !== "'"`);
         return null;
       }
       const attrEndIndex = s.indexOf(attrEndChar, ++pos);
@@ -276,12 +279,13 @@ export class Parser {
     console.log('doctypeContent is ', doctypeContent);
   }
   /**
-   * 在解析Ajax获取页面时，也可以用的
+   * 在解析Ajax请求获取页面时，也可以用的
    * 将 dom字符串，解析为 虚拟dom
    * @param data
    */
-  parseFromString(data: string): TypeNode | undefined {
+  parseFromString(data: string): TextNode | XElement {
     console.log('parser parseFromString . ');
+    console.log('data is ', data);
     this._currentFragment = [];
     this._stack = [];
     this._errorCode = ParserErrorCode.NoError;
@@ -289,12 +293,14 @@ export class Parser {
     this.parseDom(data.trim());
 
     if (this._errorCode !== ParserErrorCode.NoError) {
-      return undefined; // return undefined on error
+      // return undefined; // return undefined on error
+      throw Error('this._errorCode !== ' + ParserErrorCode.NoError);
     }
     // We should only have one root.
     const [documentElement] = this._currentFragment;
     if (!documentElement) {
-      return undefined; // Return undefined if no root was found.
+      // return undefined; // Return undefined if no root was found.
+      throw Error('documentElement is undefined . ');
     }
     return documentElement;
   }
@@ -303,12 +309,12 @@ export class Parser {
     if (isWhitespaceString(text)) {
       return;
     }
-    const xEl = new XElement('span');
+    const xEl = new XElement({ nodeName: 'span' });
     const node = new TextNode(xEl, text);
     this._currentFragment.push(node);
   }
   onCdata(text: string): void {
-    const xEl = new XElement('span');
+    const xEl = new XElement({ nodeName: 'span' });
     const node = new TextNode(xEl, text);
     this._currentFragment.push(node);
   }
@@ -324,8 +330,8 @@ export class Parser {
       name = name.toLowerCase();
     }
     // todo 根据name创建各个定义的类，包括 (XElement | TextNode)
-    console.log('name is ', name);
-    const node = new XElement(name);
+    // console.log('name is ', name);
+    const node = new XElement({ nodeName: name });
     node.childNodes = [];
     if (this._hasAttributes) {
       node.attributes = attributes;
@@ -348,14 +354,15 @@ export class Parser {
     // 取回缓存的节点
     this._currentFragment = this._stack?.pop() || [];
     const lastElement = this._currentFragment?.at(-1);
-    console.log('lastElement is ', lastElement);
+    // console.log('lastElement is ', lastElement);
     if (!lastElement) {
       return null;
     }
     // 对应的字节点
     for (const child of lastElement.children) {
-      child.parent = lastElement as TypeElement;
+      child.parent = lastElement as XElement;
     }
+    // console.log('lastElement is ', lastElement);
     return lastElement;
   }
   onError(code: number): void {
