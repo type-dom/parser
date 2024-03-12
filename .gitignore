@@ -1,7 +1,6 @@
 node_modules
 package-lock.json
 yarn.lock
-.DS_Store
 eslint_log.eslint_log
 .idea
 dist
@@ -9,3 +8,9 @@ docs
 js
 coverage-ts
 
+# System Files
+####################################
+######## OS generated files ########
+####################################
+*.DS_Store
+Thumbs.db
