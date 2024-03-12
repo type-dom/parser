@@ -1,26 +1,9 @@
-import { INodeAttr, TextNode, XElement } from 'type-dom.ts';
-import { ParserErrorCode } from './parser.const';
-import { isWhitespace, isWhitespaceString } from './parser.util';
-import { IContent, IInstruction, IParam } from './parser.interface';
-/**
- * The code for XMLParser copied from pdf.js
- * 虚拟DOM/XML字符串解析工具
- * DOM/XML对象和String字符串之间的转换
- * 字符串解析为(XElement | TextNode)对象。？？？？todo 解析为 className 对应的类。
- */
-export class Parser {
-  private _currentFragment: (XElement | TextNode)[];
-  private _stack: (XElement | TextNode)[][];
-  private _errorCode: number;
-  private readonly _hasAttributes: boolean | undefined;
-  private readonly _lowerCaseName: boolean | undefined;
-  constructor(param?: IParam) {
-    this._currentFragment = [];
-    this._stack = [];
-    this._errorCode = ParserErrorCode.NoError;
-    this._hasAttributes = param?.hasAttributes || true;
-    this._lowerCaseName = param?.lowerCaseName || false;
-  }
+import { IContent, IInstruction, INodeAttr } from './interface';
+import { isWhitespace } from './isWhitespace';
+import { XMLParserErrorCode } from './XMLParserErrorCode';
+
+// ToDo 作为基类的意义是什么？？
+export abstract class XMLParserBase {
   _resolveEntities(s: string): string {
     return s.replace(/&([^;]+);/g, (all, entity) => {
       if (entity.substring(0, 2) === '#x') {
@@ -43,13 +26,13 @@ export class Parser {
       return this.onResolveEntity(entity);
     });
   }
+
   /**
-   * 解析字符串，----> (XElement | TextNode)
+   * 解析字符串，----> XmlNode
    * @param s
    * @param start
    */
   _parseContent(s: string, start: number): IContent | null {
-    // console.log('_parseContent . ')
     const attributes: INodeAttr[] = [];
     let pos = start;
 
@@ -89,9 +72,7 @@ export class Parser {
       ++pos;
       skipWs();
       const attrEndChar = s[pos];
-      // 限定了属性值必须以 ' or " 结尾 ， 不能注掉，会解析出错
       if (attrEndChar !== '"' && attrEndChar !== "'") {
-        // console.log(`attrEndChar !== '"' && attrEndChar !== "'"`);
         return null;
       }
       const attrEndIndex = s.indexOf(attrEndChar, ++pos);
@@ -100,18 +81,12 @@ export class Parser {
       }
       attrValue = s.substring(pos, attrEndIndex);
       // todo 不同值的处理
-      let value = this._resolveEntities(attrValue);
-      // if (value === 'true' || value === 'false') {
-      //   attributes.push({
-      //     name: attrName,
-      //     value: value === 'true',
-      //   });
-      // } else {
+      const value = this._resolveEntities(attrValue);
+      // attributes[attrName] = this._resolveEntities(attrValue);
       attributes.push({
         name: attrName,
         value: value,
       });
-      // }
       pos = attrEndIndex + 1;
       skipWs();
     }
@@ -121,13 +96,16 @@ export class Parser {
       parsed: pos - start,
     };
   }
+
   _parseProcessingInstruction(s: string, start: number): IInstruction {
     let pos = start;
+
     function skipWs() {
       while (pos < s.length && isWhitespace(s, pos)) {
         ++pos;
       }
     }
+
     while (
       pos < s.length &&
       !isWhitespace(s, pos) &&
@@ -150,12 +128,13 @@ export class Parser {
       parsed: pos - start,
     };
   }
+
   /**
-   * 解析dom字符串
+   * 解析xml字符串
    * @param s
    */
-  parseDom(s: string): void {
-    // console.log('parseDom . ');
+  parseXml(s: string): void {
+    // console.log('parseXml . ');
     // console.log('s is ', s);
     let i = 0;
     while (i < s.length) {
@@ -173,7 +152,7 @@ export class Parser {
             ++j;
             q = s.indexOf('>', j);
             if (q < 0) {
-              this.onError(ParserErrorCode.UnterminatedElement);
+              this.onError(XMLParserErrorCode.UnterminatedElement);
               return;
             }
             this.onEndElement(s.substring(j, q));
@@ -183,7 +162,7 @@ export class Parser {
             ++j;
             pi = this._parseProcessingInstruction(s, j);
             if (s.substring(j + pi.parsed, j + pi.parsed + 2) !== '?>') {
-              this.onError(ParserErrorCode.UnterminatedXmlDeclaration);
+              this.onError(XMLParserErrorCode.UnterminatedXmlDeclaration);
               return;
             }
             this.onPi(pi.name, pi.value);
@@ -193,7 +172,7 @@ export class Parser {
             if (s.substring(j + 1, j + 3) === '--') {
               q = s.indexOf('-->', j + 3);
               if (q < 0) {
-                this.onError(ParserErrorCode.UnterminatedComment);
+                this.onError(XMLParserErrorCode.UnterminatedComment);
                 return;
               }
               this.onComment(s.substring(j + 3, q));
@@ -201,7 +180,7 @@ export class Parser {
             } else if (s.substring(j + 1, j + 8) === '[CDATA[') {
               q = s.indexOf(']]>', j + 8);
               if (q < 0) {
-                this.onError(ParserErrorCode.UnterminatedCdat);
+                this.onError(XMLParserErrorCode.UnterminatedCdat);
                 return;
               }
               this.onCdata(s.substring(j + 8, q));
@@ -211,14 +190,14 @@ export class Parser {
               let complexDoctype = false;
               q = s.indexOf('>', j + 8);
               if (q < 0) {
-                this.onError(ParserErrorCode.UnterminatedDoctypeDeclaration);
+                this.onError(XMLParserErrorCode.UnterminatedDoctypeDeclaration);
                 return;
               }
               if (q2 > 0 && q > q2) {
                 q = s.indexOf(']>', j + 8);
                 if (q < 0) {
                   this.onError(
-                    ParserErrorCode.UnterminatedDoctypeDeclaration
+                    XMLParserErrorCode.UnterminatedDoctypeDeclaration
                   );
                   return;
                 }
@@ -231,14 +210,14 @@ export class Parser {
               this.onDoctype(doctypeContent);
               j = q + (complexDoctype ? 2 : 1);
             } else {
-              this.onError(ParserErrorCode.MalformedElement);
+              this.onError(XMLParserErrorCode.MalformedElement);
               return;
             }
             break;
           default:
             content = this._parseContent(s, j);
             if (content === null) {
-              this.onError(ParserErrorCode.MalformedElement);
+              this.onError(XMLParserErrorCode.MalformedElement);
               return;
             }
             isClosed = false;
@@ -249,7 +228,7 @@ export class Parser {
             } else if (
               s.substring(j + content.parsed, j + content.parsed + 1) !== '>'
             ) {
-              this.onError(ParserErrorCode.UnterminatedElement);
+              this.onError(XMLParserErrorCode.UnterminatedElement);
               return;
             }
             this.onBeginElement(content.name, content.attributes, isClosed);
@@ -266,106 +245,30 @@ export class Parser {
       i = j;
     }
   }
+
   onResolveEntity(name: string): string {
     return `&${name};`;
   }
+
   onPi(name: string, value: string): void {
-    console.log('onPi name is ' + name + ' value is ' + value);
+    //
   }
+
   onComment(text: string): void {
-    console.log('onComment text is ', text);
+    //
   }
+
+  abstract onCdata(text: string): void;
+
   onDoctype(doctypeContent: string): void {
-    console.log('doctypeContent is ', doctypeContent);
-  }
-  /**
-   * 在解析Ajax请求获取页面时，也可以用的
-   * 将 dom字符串，解析为 虚拟dom
-   * @param data
-   */
-  parseFromString(data: string): TextNode | XElement {
-    console.log('parser parseFromString . ');
-    console.log('data is ', data);
-    this._currentFragment = [];
-    this._stack = [];
-    this._errorCode = ParserErrorCode.NoError;
-
-    this.parseDom(data.trim());
-
-    if (this._errorCode !== ParserErrorCode.NoError) {
-      // return undefined; // return undefined on error
-      throw Error('this._errorCode !== ' + ParserErrorCode.NoError);
-    }
-    // We should only have one root.
-    const [documentElement] = this._currentFragment;
-    if (!documentElement) {
-      // return undefined; // Return undefined if no root was found.
-      throw Error('documentElement is undefined . ');
-    }
-    return documentElement;
-  }
-  // 文本节点
-  onText(text: string): void {
-    if (isWhitespaceString(text)) {
-      return;
-    }
-    const xEl = new XElement({ nodeName: 'span' });
-    const node = new TextNode(xEl, text);
-    this._currentFragment.push(node);
-  }
-  onCdata(text: string): void {
-    const xEl = new XElement({ nodeName: 'span' });
-    const node = new TextNode(xEl, text);
-    this._currentFragment.push(node);
+    //
   }
 
-  /**
-   * 在开始的元素
-   * @param name  nodeName
-   * @param attributes
-   * @param isEmpty
-   */
-  onBeginElement(name: string, attributes: INodeAttr[], isEmpty?: boolean): void {
-    if (this._lowerCaseName) {
-      name = name.toLowerCase();
-    }
-    // todo 根据name创建各个定义的类，包括 (XElement | TextNode)
-    // console.log('name is ', name);
-    const node = new XElement({ nodeName: name });
-    node.childNodes = [];
-    if (this._hasAttributes) {
-      node.attributes = attributes;
-    }
-    this._currentFragment.push(node);
-    if (isEmpty) {
-      return;
-    }
-    // 存入缓存
-    this._stack.push(this._currentFragment);
-    this._currentFragment = node.children as (XElement | TextNode)[];
-  }
+  abstract onText(text: string): void;
 
-  /**
-   * 在结束的元素
-   * @param name 应该是nodeName
-   */
-  onEndElement(name?: string): (XElement | TextNode) | null {
-    // console.log('onEndElement . name is ', name);
-    // 取回缓存的节点
-    this._currentFragment = this._stack?.pop() || [];
-    const lastElement = this._currentFragment?.at(-1);
-    // console.log('lastElement is ', lastElement);
-    if (!lastElement) {
-      return null;
-    }
-    // 对应的字节点
-    for (const child of lastElement.children) {
-      child.parent = lastElement as XElement;
-    }
-    // console.log('lastElement is ', lastElement);
-    return lastElement;
-  }
-  onError(code: number): void {
-    this._errorCode = code;
-  }
+  abstract onBeginElement(name: string, attributes: INodeAttr[], isEmpty: boolean): void;
+
+  abstract onEndElement(name: string): void;
+
+  abstract onError(code: number): void;
 }

@@ -6,7 +6,7 @@
 
 ```bash
 # or pnpm or yarn
-npm install type-dom-parser
+npm install type-node-parser
 ```
 
 ## Usage
@@ -14,7 +14,8 @@ npm install type-dom-parser
 ### use the lib
 
 ```ts
-......
+
+
 ```
 ## License
 

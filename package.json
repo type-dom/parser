@@ -5,8 +5,6 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "prepub": "cp README.md dist && cp package.json dist",
-    "pub": "npm run build && npm run prepub && cd dist && npm publish",
     "test": "jest",
     "lint": "eslint src",
     "lint-fix": "eslint 'src/**/*.{ts,js,tsx,jsx}' --fix -o eslint_log.log",
@@ -16,7 +14,7 @@
   },
   "keywords": [
     "type-dom",
-    "type-dom-parser",
+    "type-node-parser",
     "TypeDom",
     "TypeNode",
     "typescript",
@@ -26,7 +24,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xjf7711/type-dom-parser.git"
+    "url": "git+https://github.com/type-dom/parser.git"
   },
   "devDependencies": {
     "@babel/core": "^7.22.5",

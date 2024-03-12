@@ -1,4 +1,12 @@
-import { INodeAttr } from 'type-dom.ts';
+
+export interface IParserParam {
+  hasAttributes?: boolean,
+  lowerCaseName?: boolean,
+}
+export interface INodeAttr {
+  name: string,
+  value: string;
+}
 export interface IContent {
   name: string,
   attributes: INodeAttr[], // ToDo 为什么用数组方式，而不是键值对？？？？
@@ -8,12 +16,4 @@ export interface IInstruction {
   name: string,
   value: string,
   parsed: number,
-}
-export interface IComponent {
-  pos: number,
-  name: string,
-}
-export interface IParam {
-  hasAttributes?: boolean,
-  lowerCaseName?: boolean,
 }
