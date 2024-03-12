@@ -12,5 +12,5 @@ coverage-ts
 ####################################
 ######## OS generated files ########
 ####################################
-*.DS_Store
-Thumbs.db
+#*.DS_Store
+#Thumbs.db
