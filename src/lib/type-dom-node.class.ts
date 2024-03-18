@@ -9,12 +9,12 @@ export class TypeDOMNode {
   attributes: INodeAttr[] = [];
   parent: undefined;
   dom?: HTMLElement | SVGElement | Text;
-  constructor(option: {nodeName?: string, nodeValue?: string
+  constructor(option?: {nodeName?: string, nodeValue?: string
 }) {
     this.className = 'TypeDOMNode';
-    this.nodeName = option.nodeName;
+    this.nodeName = option?.nodeName;
     // this.dom = document.createElement(this.nodeName);
-    this.nodeValue = option.nodeValue;
+    this.nodeValue = option?.nodeValue;
     this.parentNode = null;
     // Object.defineProperty(this, 'parentNode', { value: null, writable: true });
   }
