@@ -1,10 +1,11 @@
 {
-  "name": "type-dom-parser",
+  "name": "@type-dom/parser",
   "version": "0.0.3",
   "description": "一种基于TypeDom框架的Dom解析类。",
   "main": "src/index.ts",
   "scripts": {
     "build": "rimraf dist && tsc",
+    "publish": "yarn build && npm publish",
     "test": "jest",
     "lint": "eslint src",
     "lint-fix": "eslint 'src/**/*.{ts,js,tsx,jsx}' --fix -o eslint_log.log",
